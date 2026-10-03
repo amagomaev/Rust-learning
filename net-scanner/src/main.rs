@@ -26,6 +26,8 @@ fn main()
 
     println!("Scanning...");
 
+    let mut counter: usize = 0;
+
     for port in start_port..=end_port{
 
         let address = SocketAddr::new(ip, port);
@@ -33,10 +35,16 @@ fn main()
         let result = TcpStream::connect_timeout(&address, Duration::from_secs(1));
 
     match result {
-        Ok(_) => println!("Port {}: CONNECTED", port),
+        Ok(_) => {
+            println!("Port {}: CONNECTED", port);
+            counter += 1;
+        }
         Err(_) => {} //loser does nothing,
     }
 
     }
+
+    println!("Scan complete.");
+    println!("Open ports found: {}", counter);
 
 }
