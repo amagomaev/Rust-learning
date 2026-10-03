@@ -9,9 +9,14 @@ fn main()
     let mut input = String::new();
     let mut start_port_input = String::new();
     let mut end_port_input = String::new();
+    
+    println!("Enter IP address:");
     stdin().read_line(&mut input).expect("Failed to read input.");
-    println!("{}", input);
+    
+    println!("Enter starting port:");
     stdin().read_line(&mut start_port_input).expect("Not a port");
+    
+    println!("Enter ending port:");
     stdin().read_line(&mut end_port_input).expect("Not a port");
 
     let ip: IpAddr = input.trim().parse().expect("Use an IP address!");
@@ -19,6 +24,7 @@ fn main()
     let start_port: u16 = start_port_input.trim().parse().expect("Use a PORT!");
     let end_port: u16 = end_port_input.trim().parse().expect("Use a PORT!");
 
+    println!("Scanning...");
 
     for port in start_port..=end_port{
 
@@ -28,7 +34,7 @@ fn main()
 
     match result {
         Ok(_) => println!("Port {}: CONNECTED", port),
-        Err(_) => println!("Port {}: CLOSED", port),
+        Err(_) => {} //loser does nothing,
     }
 
     }
