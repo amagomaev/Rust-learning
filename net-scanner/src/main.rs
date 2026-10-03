@@ -20,7 +20,7 @@ fn main()
     let end_port: u16 = end_port_input.trim().parse().expect("Use a PORT!");
 
 
-    for port in start_port..end_port{
+    for port in start_port..=end_port{
 
         let address = SocketAddr::new(ip, port);
 
