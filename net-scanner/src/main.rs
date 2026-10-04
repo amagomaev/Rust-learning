@@ -1,8 +1,7 @@
-use std::net::TcpStream;
+use std::net::{TcpStream, SocketAddr, IpAddr};
 use std::io::stdin;
-use std::net::SocketAddr;
 use std::time::Duration;
-use std::net::IpAddr;
+use std::thread;
 
 fn main() {
     println!("Scanning...");
@@ -17,33 +16,70 @@ fn main() {
 }
 
 fn get_ip() -> IpAddr {
-    let mut input = String::new();
-    println!("Enter IP address:");
-    stdin().read_line(&mut input).expect("Failed to read input.");
-    let ip = input.trim().parse().expect("Use an IP address!");
-    ip
+    loop {
+        let mut input = String::new();
+        println!("Enter IP address:");
+        stdin().read_line(&mut input).expect("Failed to read input.");
+
+        match input.trim().parse() {
+            Ok(ip) => return ip,
+            Err(_) => println!("Invalid IP!"),
+        }
+    }
 }
 
 fn get_port(prompt: &str) -> u16 {
-    let mut port_input = String::new();
-    println!("{}", prompt);
-    stdin().read_line(&mut port_input).expect("Use a PORT.");
-    port_input.trim().parse().expect("Use a PORT!")
+    loop{ 
+        let mut port_input = String::new();
+        println!("{}", prompt);
+        stdin().read_line(&mut port_input).expect("Use a PORT.");
+
+        match port_input.trim().parse() {
+            Ok(port) => {
+                return port;
+            }
+            Err(_) => println!("Invalid port!"),
+        }
+    }
+    
 }
 
 fn scan_ports(ip_address: IpAddr, start_port: u16, end_port: u16) -> usize {
     let mut counter:usize = 0;
+    let mut vector = Vec::new();
     
     for port in start_port..=end_port {
     let address = SocketAddr::new(ip_address, port); 
-    let result = TcpStream::connect_timeout(&address, Duration::from_secs(1));
-    match result {
-        Ok(_) => {
-            println!("Port {}: CONNECTED", port);
-            counter += 1;
+    let multiple_connections = thread::spawn(move || {
+        let connection_result = TcpStream::connect_timeout(&address, Duration::from_secs(1));
+    
+        (port, connection_result)
+    });
+    vector.push(multiple_connections);
+    }
+
+    for handle in vector {
+        let result = handle.join();
+    
+        match result {
+            Ok((port, connection_result)) => {
+                match connection_result {
+                    Ok(_) => {
+                        println!("Port {}: CONNECTED", port); 
+                        counter += 1;
+                    }
+
+                    Err(_) => {
+
+                    }
+                }
+            }
+            Err(_) => {
+                //thread failed
+            }
+        
         }
-        Err(_) => {}
-        }
+    
     }
     counter
 }
